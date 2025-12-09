@@ -14,11 +14,35 @@ use GuzzleHttp\Exception\RequestException;
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_config/
  */
+function ___smarty_url_utils_civicrm_config(&$config): void {
+  _smarty_url_utils_civix_civicrm_config($config);
+
+    $smarty = CRM_Core_Smarty::singleton();
+
+  $registeredPlugins = $smarty->getRegisteredPlugins();
+  if (!isset($registeredPlugins['modifier']['shorten'])) {
+    $smarty->registerPlugin('modifier', 'shorten', 'smarty_url_utils_shorten');
+  }
+}
+
 function smarty_url_utils_civicrm_config(&$config): void {
   _smarty_url_utils_civix_civicrm_config($config);
 
+  static $alreadyRegistered = false;
+
+  $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+  \Civi::log()->debug(print_r($backtrace, true));
+  if ($alreadyRegistered) {
+    \Civi::log()->warning("DOUBLE APPEL D<C3><89>TECT<C3><89>: smarty_url_utils_civicrm_config");
+    return;
+  }
+
+  $alreadyRegistered = true;
+  \Civi::log()->info("Premier appel de smarty_url_utils_civicrm_config");
+
   $smarty = CRM_Core_Smarty::singleton();
-  $smarty->registerPlugin('modifier', 'shorten', 'smarty_url_utils_shorten');
+  $smarty->registerPlugin('modifier', 'yourls_shorten', 'smarty_url_utils_shorten');
+
 }
 
 /**
